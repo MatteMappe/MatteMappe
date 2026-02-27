@@ -1,0 +1,40 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def u_exact(x):
+    return x + 1 - (1 + np.cos(np.pi*x))/np.pi**2
+
+n = 40
+a, b = -1, 1
+h = (b-a)/n
+x = np.linspace(a, b, n+1)
+
+
+m = n-1
+A = np.zeros((m, m))
+rhs = (h**2) * np.cos(np.pi * x[1:-1])
+
+uL, uR = 0.0, 2.0
+rhs[0]  -= uL
+rhs[-1] -= uR
+
+for i in range(m):
+    A[i, i] = -2
+    if i > 0:     A[i, i-1] = 1
+    if i < m-1:   A[i, i+1] = 1
+
+u_inner = np.linalg.solve(A, rhs)
+
+u_num = np.zeros(n+1)
+u_num[0], u_num[-1] = uL, uR
+u_num[1:-1] = u_inner
+
+u_ex = u_exact(x)
+
+print("max error =", np.max(np.abs(u_num - u_ex)))
+
+plt.plot(x, u_ex, label="Eksakt")
+plt.plot(x, u_num, "--", label="Numerisk (FD)")
+plt.legend()
+plt.grid(True)
+plt.show()
